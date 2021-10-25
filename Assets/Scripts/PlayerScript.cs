@@ -11,28 +11,49 @@ public class PlayerScript : MonoBehaviour
 
     public Text score;
 
+    public Text lives;
+    
+    public Text YouWin;
+
+    private int gameOver = 0;
+
     private int scoreValue = 0;
 
+    private int livesValue = 3;
+
     public float jumpforce;
+
+    public AudioClip musicClipOne;
+
+    public AudioClip musicClipTwo;
+
+    public AudioSource musicSource;
 
     // Start is called before the first frame update
     void Start()
     {
         rd2d = GetComponent<Rigidbody2D>();
         score.text = scoreValue.ToString();
+        YouWin.text = "";
+        lives.text = livesValue.ToString();
+        musicSource.clip = musicClipOne;
+        musicSource.Play();
+        musicSource.loop = true;
+        
     }
     
     // Update is called once per frame
     void Update()
     {
-         if (Input.GetKeyDown("escape"))
+        if (Input.GetKeyDown("escape"))
         {
             Application.Quit();
         }
 
-        if (scoreValue == 5)
+        if (gameOver == 1)
         {
-            score.text = "You Won! Game by Joseph Donnelly.";
+            livesValue = 3;
+            lives.text = livesValue.ToString();
         }
     }
 
@@ -50,11 +71,41 @@ private void OnCollisionEnter2D(Collision2D collision)
             scoreValue += 1;
             score.text = scoreValue.ToString();
             Destroy(collision.collider.gameObject);
+               if (scoreValue == 4)
+            {
+                transform.position = new Vector2(114.8f, 0.08f);
+                livesValue = 3;
+                lives.text = livesValue.ToString();
+            }
+             if (scoreValue == 8)
+            {
+                YouWin.text = "You Won! Game by Joseph Donnelly.";
+                gameOver = 1;
+            }
+                if (gameOver == 1)
+            {
+                musicSource.Stop();
+                musicSource.clip = musicClipTwo;
+                musicSource.Play();
+                musicSource.loop = true;
+            }
         }
 
+               if (collision.collider.tag == "Enemy")
+        {
+            livesValue -= 1;
+            lives.text = livesValue.ToString();
+            Destroy(collision.collider.gameObject);
+                if (livesValue == 0)
+            {        
+                    YouWin.text = "You Lost! Game by Joseph Donnelly.";
+                    Destroy(this);
+        }
+             
+        }
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.collider.tag == "Ground")
         {
